@@ -1,0 +1,75 @@
+module SPI_Master (
+    output reg ss,
+    output reg MOSI,
+    output reg done,
+    input  [7:0] data_in,
+    input  clk,
+    input  rst
+);
+
+reg [3:0] count;
+reg [1:0] state;
+
+parameter idle   = 2'b00;
+parameter start  = 2'b01;
+parameter finish = 2'b10;
+parameter next   = 2'b11;
+
+always @(posedge clk)
+begin
+    if (rst)
+    begin
+        ss    <= 1'b0;
+        MOSI  <= 1'b0;
+        done  <= 1'b0;
+        count <= 4'b0111; 
+        state <= idle;
+    end
+    else
+    begin
+        case(state)
+
+            idle:
+            begin
+                ss    <= 1'b0;
+                MOSI  <= 1'b0;
+                done  <= 1'b0;
+                count <= 4'b0111;
+                state <= start;
+            end
+
+            start:
+            begin
+                ss    <= 1'b1;
+                MOSI  <= data_in[count]; 
+
+                if(count == 4'b0000)    sent
+                begin
+                    state <= finish;
+                end
+                else
+                begin
+                    count <= count - 1'b1;
+                    state <= start;
+                end
+            end
+
+            finish:
+            begin
+                ss    <= 1'b1;
+                done  <= 1'b1;
+                state <= next;
+            end
+
+            next:
+            begin
+                done  <= 1'b0;
+                state <= idle; 
+            end
+            default: state <= idle;
+
+        endcase
+    end
+end
+
+endmodule
