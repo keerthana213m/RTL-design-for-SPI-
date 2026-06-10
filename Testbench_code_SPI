@@ -1,0 +1,59 @@
+// `timescale 1ns/1ps
+
+module SPI_Master_tb;
+
+reg clk;
+reg rst;
+reg [7:0] data_in;
+
+wire ss;
+wire MOSI;
+wire done;
+
+// DUT Instantiation
+SPI_Master uut (
+    .ss(ss),
+    .MOSI(MOSI),
+    .done(done),
+    .data_in(data_in),
+    .clk(clk),
+    .rst(rst)
+);
+
+// Dump file for GTKWave
+initial begin
+    $dumpfile("spi_master.vcd");
+    $dumpvars(0, SPI_Master_tb);
+end
+
+// Clock Generation (10 ns period)
+initial begin
+    clk = 0;
+    forever #5 clk = ~clk;
+end
+
+// Test Stimulus
+initial begin
+    rst = 1;
+    data_in = 8'b10101010;
+
+    #20;
+    rst = 0;
+
+//     #100;
+//     data_in = 8'b11001100;
+
+//     #100;
+//     data_in = 8'b11110000;
+
+    #100;
+    $finish;
+end
+
+// Monitor values
+initial begin
+    $monitor("Time=%0t rst=%b ss=%b MOSI=%b done=%b data_in=%b",
+              $time, rst, ss, MOSI, done, data_in);
+end
+
+endmodule
